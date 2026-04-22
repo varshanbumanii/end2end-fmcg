@@ -5,171 +5,71 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-body {
-    margin: 0;
-    font-family: 'Segoe UI';
-    background: #f3f4f6;
-}
+body { margin:0; font-family:'Segoe UI'; background:#f3f4f6; }
 
-/* HEADER */
-.header {
-    padding: 20px;
-}
+.header { padding:20px; }
+.header p { color:gray; }
 
-.header h1 {
-    margin: 0;
-}
+.kpi-row { display:flex; gap:20px; padding:20px; }
+.kpi { background:white; padding:20px; border-radius:10px; flex:1; text-align:center; }
 
-.header p {
-    color: gray;
-}
+.filters { display:flex; gap:10px; padding:10px 20px; }
 
-/* KPI */
-.kpi-row {
-    display: flex;
-    gap: 20px;
-    padding: 20px;
-}
+.grid { display:grid; grid-template-columns: repeat(3,1fr); gap:20px; padding:20px; }
+.card { background:white; padding:20px; border-radius:10px; }
 
-.kpi {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    flex: 1;
-    text-align: center;
-}
+.navbar { display:flex; justify-content:center; gap:20px; padding:10px; }
+button { background:orange; color:white; border:none; padding:8px 16px; cursor:pointer; }
 
-.kpi h2 {
-    margin: 0;
-}
-
-.kpi p {
-    color: green;
-}
-
-/* FILTERS */
-.filters {
-    display: flex;
-    gap: 10px;
-    padding: 10px 20px;
-}
-
-/* GRID */
-.grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    padding: 20px;
-}
-
-.card {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-}
-
-/* NAV */
-.navbar {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    padding: 10px;
-}
-
-button {
-    background: orange;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-}
-
-/* SECTION */
-.section { display: none; }
-.active { display: block; }
-
+.section { display:none; }
+.active { display:block; }
 </style>
 </head>
 
 <body>
 
+<div class="header">
+<h1>Sales Dashboard</h1>
+</div>
 <div class="navbar">
-    <button onclick="showSection('primary')">Primary</button>
-    <button onclick="showSection('secondary')">Secondary</button>
+<button onclick="showSection('primary')">Primary</button>
+<button onclick="showSection('secondary')">Secondary</button>
 </div>
 
 <div class="filters">
-    <input type="date" id="start">
-    <input type="date" id="end">
-    <select id="region">
-        <option value="">All Regions</option>
-        <option>North</option>
-        <option>South</option>
-    </select>
-    <select id="category">
-        <option value="">All Categories</option>
-        <option>Beverages</option>
-        <option>Snacks</option>
-    </select>
-    <button onclick="loadAll()">Apply</button>
+<input type="date" id="start">
+<input type="date" id="end">
+<select id="region"></select>
+<select id="category"></select>
+<button onclick="loadAll()">Apply</button>
 </div>
 
-<!-- PRIMARY -->
 <div id="primary" class="section active">
 
-<div class="header">
-<h1>Sales Dashboard</h1>
-<p>Key performance indicators for FMCG business</p>
-</div>
+<p><h4><center>Key performance indicators</center></h4></p>
 
 <div class="kpi-row">
 <div class="kpi"><h2 id="rev"></h2><p>Total Revenue</p></div>
 <div class="kpi"><h2 id="ord"></h2><p>Total Orders</p></div>
-<div class="kpi"><h2 id="aov"></h2><p>Average Order Value</p></div>
-<div class="kpi"><h2 id="cust"></h2><p>Total Customers</p></div>
+<div class="kpi"><h2 id="aov"></h2><p>AOV</p></div>
+<div class="kpi"><h2 id="cust"></h2><p>Customers</p></div>
 </div>
 
 <div class="grid">
-<div class="card">
-<h3>Revenue Trend</h3>
-<canvas id="trend"></canvas>
-</div>
-
-<div class="card">
-<h3>Revenue by Category</h3>
-<canvas id="categoryChart"></canvas>
-</div>
-
-<div class="card">
-<h3>Sales by Region</h3>
-<canvas id="regionChart"></canvas>
-</div>
+<div class="card"><h3>Monthly Revenue</h3><canvas id="trend"></canvas></div>
+<div class="card"><h3>Revenue by Category</h3><canvas id="categoryChart"></canvas></div>
+<div class="card"><h3>Sales by Region</h3><canvas id="regionChart"></canvas></div>
 </div>
 
 </div>
 
-<!-- SECONDARY -->
 <div id="secondary" class="section">
-
-<div class="header">
-<h1>Deep Dive Analysis</h1>
-<p>Product, customer and channel insights</p>
-</div>
+<div class="header"><h1>Deep Dive</h1></div>
 
 <div class="grid">
-<div class="card">
-<h3>Top Products</h3>
-<canvas id="productChart"></canvas>
-</div>
-
-<div class="card">
-<h3>Top Customers</h3>
-<canvas id="customerChart"></canvas>
-</div>
-
-<div class="card">
-<h3>Sales by Channel</h3>
-<canvas id="channelChart"></canvas>
-</div>
+<div class="card"><h3>Top Products</h3><canvas id="productChart"></canvas></div>
+<div class="card"><h3>Top Customers</h3><canvas id="customerChart"></canvas></div>
+<div class="card"><h3>Channel Split</h3><canvas id="channelChart"></canvas></div>
 </div>
 
 </div>
@@ -178,58 +78,64 @@ button {
 
 let charts = {};
 
-// FORMAT FUNCTION
 function formatNumber(num){
-    if(num >= 1000000) return (num/1000000).toFixed(1) + "M";
-    if(num >= 1000) return (num/1000).toFixed(1) + "K";
+    if(num >= 1000000) return (num/1000000).toFixed(1)+"M";
+    if(num >= 1000) return (num/1000).toFixed(1)+"K";
     return num;
 }
 
-// NAV
 function showSection(s){
     document.querySelectorAll('.section').forEach(d=>d.classList.remove('active'));
     document.getElementById(s).classList.add('active');
 }
 
-// FILTERS
 function getFilters(){
-    return {
-        start: start.value,
-        end: end.value,
-        region: region.value,
-        category: category.value
-    }
+    return { start:start.value, end:end.value, region:region.value, category:category.value }
 }
 
-// RESET CHART
+async function loadFilters(){
+    const d = await (await fetch('/filters')).json();
+
+    region.innerHTML = `<option value="">All Regions</option>`;
+    d.regions.forEach(r=> region.innerHTML += `<option>${r}</option>`);
+
+    category.innerHTML = `<option value="">All Categories</option>`;
+    d.categories.forEach(c=> category.innerHTML += `<option>${c}</option>`);
+}
+
 function resetChart(id){
     if(charts[id]) charts[id].destroy();
 }
 
 // KPI
 async function loadKPIs(){
-    const d = await (await fetch('/kpis')).json();
-    rev.innerText = "₹" + formatNumber(d.total_revenue);
+    const f = getFilters();
+    const d = await (await fetch(`/kpis?start=${f.start}&end=${f.end}&region=${f.region}&category=${f.category}`)).json();
+
+    rev.innerText = "₹"+formatNumber(d.total_revenue);
     ord.innerText = formatNumber(d.total_orders);
-    aov.innerText = "₹" + formatNumber(d.aov);
+    aov.innerText = "₹"+formatNumber(d.aov);
     cust.innerText = formatNumber(d.total_customers);
 }
 
-// TREND
+// MONTHLY
 async function loadTrend(){
     resetChart("trend");
     const f = getFilters();
     const data = await (await fetch(`/sales?start=${f.start}&end=${f.end}`)).json();
 
+    let map={};
+    data.forEach(d=>{
+        if(!d.order_date) return;
+        const m = d.order_date.slice(0,7);
+        map[m]=(map[m]||0)+d.total_revenue;
+    });
+
     charts["trend"] = new Chart(trend,{
-        type:'line',
+        type:'bar',
         data:{
-            labels:data.map(d=>d.order_date),
-            datasets:[{
-                label:"Revenue",
-                data:data.map(d=>d.total_revenue),
-                borderColor:"#3b82f6"
-            }]
+            labels:Object.keys(map),
+            datasets:[{label:"Revenue",data:Object.values(map),backgroundColor:"#3b82f6"}]
         }
     });
 }
@@ -241,18 +147,14 @@ async function loadCategory(){
     const data = await (await fetch(`/products?category=${f.category}`)).json();
 
     let map={};
-    data.forEach(d=>map[d.category]=(map[d.category]||0)+d.total_revenue);
+    data.forEach(d=>{
+        if(d.category)
+            map[d.category]=(map[d.category]||0)+d.total_revenue;
+    });
 
     charts["categoryChart"] = new Chart(categoryChart,{
         type:'bar',
-        data:{
-            labels:Object.keys(map),
-            datasets:[{
-                label:"Revenue",
-                data:Object.values(map),
-                backgroundColor:"#3b82f6"
-            }]
-        }
+        data:{labels:Object.keys(map),datasets:[{label:"Revenue",data:Object.values(map)}]}
     });
 }
 
@@ -263,18 +165,14 @@ async function loadRegion(){
     const data = await (await fetch(`/customers?region=${f.region}`)).json();
 
     let map={};
-    data.forEach(d=>map[d.region]=(map[d.region]||0)+d.total_revenue);
+    data.forEach(d=>{
+        if(d.region)
+            map[d.region]=(map[d.region]||0)+d.total_revenue;
+    });
 
     charts["regionChart"] = new Chart(regionChart,{
         type:'bar',
-        data:{
-            labels:Object.keys(map),
-            datasets:[{
-                label:"Revenue",
-                data:Object.values(map),
-                backgroundColor:"#3b82f6"
-            }]
-        }
+        data:{labels:Object.keys(map),datasets:[{label:"Revenue",data:Object.values(map)}]}
     });
 }
 
@@ -282,19 +180,11 @@ async function loadRegion(){
 async function loadProducts(){
     resetChart("productChart");
     const data = await (await fetch('/products')).json();
-
     const top = data.slice(0,5);
 
     charts["productChart"] = new Chart(productChart,{
         type:'bar',
-        data:{
-            labels:top.map(d=>d.product_name),
-            datasets:[{
-                label:"Revenue",
-                data:top.map(d=>d.total_revenue),
-                backgroundColor:"#10b981"
-            }]
-        }
+        data:{labels:top.map(d=>d.product_name),datasets:[{label:"Revenue",data:top.map(d=>d.total_revenue)}]}
     });
 }
 
@@ -302,19 +192,11 @@ async function loadProducts(){
 async function loadCustomers(){
     resetChart("customerChart");
     const data = await (await fetch('/customers')).json();
-
     const top = data.slice(0,5);
 
     charts["customerChart"] = new Chart(customerChart,{
         type:'bar',
-        data:{
-            labels:top.map(d=>d.name),
-            datasets:[{
-                label:"Revenue",
-                data:top.map(d=>d.total_revenue),
-                backgroundColor:"#f97316"
-            }]
-        }
+        data:{labels:top.map(d=>d.name),datasets:[{label:"Revenue",data:top.map(d=>d.total_revenue)}]}
     });
 }
 
@@ -324,18 +206,17 @@ async function loadChannel(){
     const data = await (await fetch('/customers')).json();
 
     let map={};
-    data.forEach(d=>map[d.channel]=(map[d.channel]||0)+d.total_revenue);
+    data.forEach(d=>{
+        if(d.channel)
+            map[d.channel]=(map[d.channel]||0)+d.total_revenue;
+    });
 
     charts["channelChart"] = new Chart(channelChart,{
         type:'pie',
-        data:{
-            labels:Object.keys(map),
-            datasets:[{data:Object.values(map)}]
-        }
+        data:{labels:Object.keys(map),datasets:[{data:Object.values(map)}]}
     });
 }
 
-// LOAD ALL
 function loadAll(){
     loadKPIs();
     loadTrend();
@@ -346,7 +227,7 @@ function loadAll(){
     loadChannel();
 }
 
-loadAll();
+loadFilters().then(loadAll);
 
 </script>
 
