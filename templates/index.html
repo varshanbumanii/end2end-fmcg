@@ -5,32 +5,132 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-body { margin:0; font-family:'Segoe UI'; background:#f3f4f6; }
 
-.header { padding:20px; }
-.header p { color:gray; }
+/* COLOR PALETTE */
+:root{
+    --primary:#3f51b5;
+    --secondary:#5c6bc0;
+    --accent:#e8b87c;
+    --highlight:#ee8f3b;
+    --bg:#f5f6fa;
+    --card:#ffffff;
+}
 
-.kpi-row { display:flex; gap:20px; padding:20px; }
-.kpi { background:white; padding:20px; border-radius:10px; flex:1; text-align:center; }
+/* GLOBAL */
+body{
+    margin:0;
+    font-family:'Segoe UI';
+    background:var(--bg);
+}
 
-.filters { display:flex; gap:10px; padding:10px 20px; }
+/* HEADER */
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:20px 30px;
+}
 
-.grid { display:grid; grid-template-columns: repeat(3,1fr); gap:20px; padding:20px; }
-.card { background:white; padding:20px; border-radius:10px; }
+.header h1{
+    margin:0;
+    font-size:24px;
+}
 
-.navbar { display:flex; justify-content:center; gap:20px; padding:10px; }
-button { background:orange; color:white; border:none; padding:8px 16px; cursor:pointer; }
+.header p{
+    color:gray;
+    margin-top:5px;
+}
 
-.section { display:none; }
-.active { display:block; }
+/* NAVBAR */
+.navbar{
+    display:flex;
+    gap:10px;
+    padding:0 30px 10px;
+}
+
+button{
+    background:var(--primary);
+    color:white;
+    border:none;
+    padding:8px 16px;
+    border-radius:6px;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+button:hover{
+    background:var(--secondary);
+}
+
+/* FILTERS */
+.filters{
+    display:flex;
+    gap:10px;
+    padding:10px 30px;
+}
+
+.filters input, .filters select{
+    padding:8px;
+    border-radius:6px;
+    border:1px solid #ddd;
+}
+
+/* KPI CARDS */
+.kpi-row{
+    display:flex;
+    gap:20px;
+    padding:20px 30px;
+}
+
+.kpi{
+    background:var(--card);
+    padding:20px;
+    border-radius:12px;
+    flex:1;
+    box-shadow:0 4px 10px rgba(0,0,0,0.05);
+}
+
+.kpi h2{
+    margin:0;
+    font-size:22px;
+}
+
+.kpi p{
+    color:gray;
+    margin-top:5px;
+}
+
+/* GRID */
+.grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:20px;
+    padding:20px 30px;
+}
+
+.card{
+    background:var(--card);
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.05);
+}
+
+/* SECTIONS */
+.section{ display:none; }
+.active{ display:block; }
+
 </style>
 </head>
 
 <body>
 
 <div class="header">
+<div>
 <h1>Sales Dashboard</h1>
+<p>Key performance indicators</p>
 </div>
+</div>
+
 <div class="navbar">
 <button onclick="showSection('primary')">Primary</button>
 <button onclick="showSection('secondary')">Secondary</button>
@@ -44,15 +144,14 @@ button { background:orange; color:white; border:none; padding:8px 16px; cursor:p
 <button onclick="loadAll()">Apply</button>
 </div>
 
+<!-- PRIMARY -->
 <div id="primary" class="section active">
-
-<p><h4><center>Key performance indicators</center></h4></p>
 
 <div class="kpi-row">
 <div class="kpi"><h2 id="rev"></h2><p>Total Revenue</p></div>
 <div class="kpi"><h2 id="ord"></h2><p>Total Orders</p></div>
-<div class="kpi"><h2 id="aov"></h2><p>AOV</p></div>
-<div class="kpi"><h2 id="cust"></h2><p>Customers</p></div>
+<div class="kpi"><h2 id="aov"></h2><p>Average Order Value</p></div>
+<div class="kpi"><h2 id="cust"></h2><p>Total Customers</p></div>
 </div>
 
 <div class="grid">
@@ -63,8 +162,8 @@ button { background:orange; color:white; border:none; padding:8px 16px; cursor:p
 
 </div>
 
+<!-- SECONDARY -->
 <div id="secondary" class="section">
-<div class="header"><h1>Deep Dive</h1></div>
 
 <div class="grid">
 <div class="card"><h3>Top Products</h3><canvas id="productChart"></canvas></div>
@@ -75,6 +174,8 @@ button { background:orange; color:white; border:none; padding:8px 16px; cursor:p
 </div>
 
 <script>
+
+/* SAME JS — NO LOGIC CHANGE */
 
 let charts = {};
 
@@ -107,7 +208,7 @@ function resetChart(id){
     if(charts[id]) charts[id].destroy();
 }
 
-// KPI
+/* KPI */
 async function loadKPIs(){
     const f = getFilters();
     const d = await (await fetch(`/kpis?start=${f.start}&end=${f.end}&region=${f.region}&category=${f.category}`)).json();
@@ -118,7 +219,7 @@ async function loadKPIs(){
     cust.innerText = formatNumber(d.total_customers);
 }
 
-// MONTHLY
+/* MONTHLY */
 async function loadTrend(){
     resetChart("trend");
     const f = getFilters();
@@ -135,12 +236,16 @@ async function loadTrend(){
         type:'bar',
         data:{
             labels:Object.keys(map),
-            datasets:[{label:"Revenue",data:Object.values(map),backgroundColor:"#3b82f6"}]
+            datasets:[{
+                label:"Revenue",
+                data:Object.values(map),
+                backgroundColor:"#3f51b5"
+            }]
         }
     });
 }
 
-// CATEGORY
+/* CATEGORY */
 async function loadCategory(){
     resetChart("categoryChart");
     const f = getFilters();
@@ -154,11 +259,18 @@ async function loadCategory(){
 
     charts["categoryChart"] = new Chart(categoryChart,{
         type:'bar',
-        data:{labels:Object.keys(map),datasets:[{label:"Revenue",data:Object.values(map)}]}
+        data:{
+            labels:Object.keys(map),
+            datasets:[{
+                label:"Revenue",
+                data:Object.values(map),
+                backgroundColor:"#ee8f3b"
+            }]
+        }
     });
 }
 
-// REGION
+/* REGION */
 async function loadRegion(){
     resetChart("regionChart");
     const f = getFilters();
@@ -172,11 +284,17 @@ async function loadRegion(){
 
     charts["regionChart"] = new Chart(regionChart,{
         type:'bar',
-        data:{labels:Object.keys(map),datasets:[{label:"Revenue",data:Object.values(map)}]}
+        data:{
+            labels:Object.keys(map),
+            datasets:[{
+                label:"Revenue",
+                data:Object.values(map),
+                backgroundColor:"#5c6bc0"
+            }]
+        }
     });
 }
 
-// PRODUCTS
 async function loadProducts(){
     resetChart("productChart");
     const data = await (await fetch('/products')).json();
@@ -184,11 +302,10 @@ async function loadProducts(){
 
     charts["productChart"] = new Chart(productChart,{
         type:'bar',
-        data:{labels:top.map(d=>d.product_name),datasets:[{label:"Revenue",data:top.map(d=>d.total_revenue)}]}
+        data:{labels:top.map(d=>d.product_name),datasets:[{data:top.map(d=>d.total_revenue)}]}
     });
 }
 
-// CUSTOMERS
 async function loadCustomers(){
     resetChart("customerChart");
     const data = await (await fetch('/customers')).json();
@@ -196,11 +313,10 @@ async function loadCustomers(){
 
     charts["customerChart"] = new Chart(customerChart,{
         type:'bar',
-        data:{labels:top.map(d=>d.name),datasets:[{label:"Revenue",data:top.map(d=>d.total_revenue)}]}
+        data:{labels:top.map(d=>d.name),datasets:[{data:top.map(d=>d.total_revenue)}]}
     });
 }
 
-// CHANNEL
 async function loadChannel(){
     resetChart("channelChart");
     const data = await (await fetch('/customers')).json();

@@ -29,6 +29,10 @@ def kpis():
     if start and end:
         sales_query += f" AND order_date BETWEEN DATE '{start}' AND DATE '{end}'"
 
+    # ✅ ADD THIS (missing piece)
+    if category:
+        sales_query += f" AND category = '{category}'"
+
     if region:
         customer_query += f" AND region = '{region}'"
 
@@ -46,7 +50,6 @@ def kpis():
         "total_customers": int(total_customers),
         "aov": float(aov)
     })
-
 # ---------------- SALES ----------------
 @app.route("/sales")
 def sales():
